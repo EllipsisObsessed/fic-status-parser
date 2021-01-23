@@ -9,7 +9,6 @@ function onOpen() {
 function autoRun()
 {
   importData();
-  copyToPublic();
 }
 
 function importData() {
@@ -33,16 +32,6 @@ function importData() {
   while (dataFoundLastAttempt > 0);
   
   sheet.getRange(2,1,sheet.getLastRow(),sheet.getLastColumn()).sort([9,10,11]);  
-}
-
-function copyToPublic()
-{
-  var privateDoc = SpreadsheetApp.openById("ID HERE");
-  var privateSheet = privateDoc.getSheets()[0];
-  var publicDoc = SpreadsheetApp.openById("ID2 HERE");
-  var publicSheet = publicDoc.getSheets()[0];
-  privateSheet.copyTo(publicDoc);
-  publicDoc.deleteSheet(publicSheet);
 }
 
 function batchProcess(sheet, startQuery, queryCount, startRow,)
