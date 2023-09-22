@@ -65,7 +65,7 @@ function importDataSplitComp()
   var startTime = (new Date()).getTime();
 
   // get the spreadsheet
-  var ss = SpreadsheetApp.openById("1upty4HFJZHywtQNrahmcjLxVFsidlB0KKeDA2cI65Uo");
+  var ss = SpreadsheetApp.openById("ID HERE");
   var sheet = ss.getSheets()[0];
 
   var startRow = 2;
