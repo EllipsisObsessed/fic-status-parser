@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="CodeFormat.css">
+</head>
+<body>
+<div style="position: relative; z-index: 0; outline: none; min-width: 0; margin-left: 0;">
+    <div style="">
+<pre>
+<span class="cm-keyword">function</span> <span class="cm-variable">onOpen</span>()
+{
+    <span class="cm-keyword">var</span> <span class="cm-def">ui</span> = <span class="cm-variable">SpreadsheetApp</span>.<span
+        class="cm-property">getUi</span>();
+    <span class="cm-variable-2">ui</span>.<span class="cm-property">createMenu</span>(<span
+        class="cm-string">'Scripts'</span>)
+    .<span class="cm-property">addItem</span>(<span class="cm-string">'Import Data'</span>, <span class="cm-string">'importData'</span>)
+    .<span class="cm-property">addItem</span>(<span class="cm-string">'Copy to Public'</span>, <span class="cm-string">'copyToPublic'</span>)
+    .<span class="cm-property">addToUi</span>();
+}
+
+<span class="cm-keyword">function</span> <span class="cm-variable">autoRun</span>()
+{
+    <span class="cm-variable">importData</span>();
+    <span class="cm-variable">copyToPublic</span>();
+}
+
+<span class="cm-keyword">function</span> <span class="cm-variable">importData</span>()
+{
+    <span class="cm-comment">// get the spreadsheet</span>
+    <span class="cm-keyword">var</span> <span class="cm-def">ss</span> = <span class="cm-variable">SpreadsheetApp</span>.<span
+        class="cm-property">openById</span>(<span
+        class="cm-string">"ID HERE"</span>);
+    <span class="cm-keyword">var</span> <span class="cm-def">sheet</span> = <span class="cm-variable-2">ss</span>.<span
+        class="cm-property">getSheets</span>()[<span class="cm-number">0</span>];
+
+    <span class="cm-variable-2">sheet</span>.<span class="cm-property">getRange</span>(<span class="cm-number">2</span>,<span
+        class="cm-number">1</span>,<span
+        class="cm-variable-2">sheet</span>.<span class="cm-property">getLastRow</span>(),<span
+        class="cm-variable-2">sheet</span>.<span class="cm-property">getLastColumn</span>()).<span
+        class="cm-property">clearContent</span>();
+
+    <span class="cm-keyword">var</span> <span class="cm-def">startRow</span> = <span
+        class="cm-number">2</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">startQuery</span> = <span
+        class="cm-number">0</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">dataFoundLastAttempt</span> = <span
+        class="cm-number">0</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">perPage</span> = <span
+        class="cm-number">50</span>;
+
+    <span class="cm-keyword">do</span>
+    {
+        <span class="cm-variable-2">dataFoundLastAttempt</span> = <span
+        class="cm-variable">batchProcess</span>(<span
+        class="cm-variable-2">sheet</span>, <span class="cm-variable-2">startQuery</span>, <span
+        class="cm-variable-2">perPage</span>, <span class="cm-variable-2">startRow</span>);
+        <span class="cm-variable-2">startRow</span> += <span class="cm-variable-2">dataFoundLastAttempt</span>;
+        <span class="cm-variable-2">startQuery</span> += <span class="cm-variable-2">perPage</span>;
+    }
+    <span class="cm-keyword">while</span> (<span class="cm-variable-2">dataFoundLastAttempt</span> &gt; <span
+        class="cm-number">0</span>);
+
+    <span class="cm-variable-2">sheet</span>.<span class="cm-property">getRange</span>(<span
+        class="cm-number">2</span>,<span class="cm-number">1</span>,<span
+        class="cm-variable-2">sheet</span>.<span class="cm-property">getLastRow</span>(),<span
+        class="cm-variable-2">sheet</span>.<span class="cm-property">getLastColumn</span>()).<span
+        class="cm-property">sort</span>([<span class="cm-number">9</span>,<span
+        class="cm-number">10</span>,<span class="cm-number">11</span>]);
+}
+
+<span class="cm-keyword">function</span> <span class="cm-variable">copyToPublic</span>()
+{
+    <span class="cm-keyword">var</span> <span class="cm-def">privateDoc</span> = <span class="cm-variable">SpreadsheetApp</span>.<span
+        class="cm-property">openById</span>(<span
+        class="cm-string">"ID HERE"</span>);
+    <span class="cm-keyword">var</span> <span class="cm-def">privateSheet</span> = <span
+        class="cm-variable-2">privateDoc</span>.<span class="cm-property">getSheets</span>()[<span
+        class="cm-number">0</span>];
+    <span class="cm-keyword">var</span> <span class="cm-def">publicDoc</span> = <span
+        class="cm-variable">SpreadsheetApp</span>.<span
+        class="cm-property">openById</span>(<span
+        class="cm-string">"ID2 HERE"</span>);
+    <span class="cm-keyword">var</span> <span class="cm-def">publicSheet</span> = <span
+        class="cm-variable-2">publicDoc</span>.<span class="cm-property">getSheets</span>()[<span
+        class="cm-number">0</span>];
+    <span class="cm-variable-2">privateSheet</span>.<span class="cm-property">copyTo</span>(<span
+        class="cm-variable-2">publicDoc</span>);
+    <span class="cm-variable-2">publicDoc</span>.<span class="cm-property">deleteSheet</span>(<span
+        class="cm-variable-2">publicSheet</span>);
+}
+
+<span class="cm-keyword">function</span> <span class="cm-variable">batchProcess</span>(<span
+        class="cm-def">sheet</span>, <span class="cm-def">startQuery</span>, <span
+        class="cm-def">queryCount</span>, <span class="cm-def">startRow</span>,)
+{
+    <span class="cm-comment">// get all email threads that match label</span>
+    <span class="cm-keyword">var</span> <span class="cm-def">threads</span> = <span
+        class="cm-variable">GmailApp</span>.<span
+        class="cm-property">search</span> (<span class="cm-string">"label:fic-to-read"</span>, <span
+        class="cm-variable-2">startQuery</span>, <span class="cm-variable-2">queryCount</span>);
+
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">threads</span> == <span
+        class="cm-atom">null</span> || <span
+        class="cm-variable-2">threads</span>.<span class="cm-variable">length</span> == <span class="cm-number">0</span>)
+    {
+        <span class="cm-keyword">return</span> <span class="cm-number">0</span>;
+    }
+
+    <span class="cm-comment">// get all the messages for the current batch of threads</span>
+    <span class="cm-keyword">var</span> <span class="cm-def">messages</span> = <span
+        class="cm-variable">GmailApp</span>.<span
+        class="cm-property">getMessagesForThreads</span> (<span class="cm-variable-2">threads</span>);
+
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">messages</span> == <span
+        class="cm-atom">null</span> || <span
+        class="cm-variable-2">messages</span>.<span class="cm-variable">length</span> == <span
+        class="cm-number">0</span>)
+    {
+        <span class="cm-keyword">return</span> <span class="cm-number">0</span>;
+    }
+
+    <span class="cm-keyword">var</span> <span class="cm-def">updateArray</span> = [];
+
+    <span class="cm-keyword">var</span> <span class="cm-def">iMax</span> = <span
+        class="cm-variable">Math</span>.<span class="cm-property">min</span>(<span class="cm-variable-2">messages</span>.<span
+        class="cm-property">length</span>, <span class="cm-number">1000</span>);
+
+    <span class="cm-keyword">for</span>(<span class="cm-keyword">var</span> <span
+        class="cm-def">i</span> = <span class="cm-number">0</span>; <span
+        class="cm-variable-2">i</span> &lt; <span class="cm-variable-2">iMax</span>; <span
+        class="cm-variable-2">i</span>++)
+    {
+        <span class="cm-keyword">for</span>(<span class="cm-keyword">var</span> <span
+        class="cm-def">j</span> = <span
+        class="cm-number">0</span>; <span class="cm-variable-2">j</span> &lt; <span
+        class="cm-variable-2">messages</span>[<span
+        class="cm-variable-2">i</span>].<span class="cm-property">length</span>; <span
+        class="cm-variable-2">j</span>++)
+        {
+            <span class="cm-keyword">var</span> <span class="cm-def">message</span> = <span
+        class="cm-variable-2">messages</span>[<span class="cm-variable-2">i</span>][<span class="cm-variable-2">j</span>];
+            <span class="cm-keyword">var</span> <span class="cm-def">subject</span> = <span
+        class="cm-variable-2">message</span>.<span class="cm-property">getSubject</span>();
+            <span class="cm-keyword">if</span>(<span class="cm-variable-2">subject</span>.<span
+        class="cm-property">includes</span>(<span class="cm-string">"posted"</span>))
+            {
+                <span class="cm-variable-2">updateArray</span>.<span class="cm-property">push</span>(<span
+        class="cm-variable">parseBody</span>(<span class="cm-variable-2">subject</span>, <span
+        class="cm-variable-2">message</span>.<span class="cm-property">getPlainBody</span>(), <span
+        class="cm-variable-2">message</span>.<span class="cm-property">getDate</span>()));
+            }
+        }
+    }
+
+    <span class="cm-variable-2">sheet</span>.<span class="cm-property">getRange</span>(<span
+        class="cm-variable-2">startRow</span>,<span class="cm-number">1</span>,<span
+        class="cm-variable-2">updateArray</span>.<span
+        class="cm-property">length</span>,<span class="cm-variable-2">updateArray</span>[<span
+        class="cm-number">0</span>].<span class="cm-property">length</span>).<span
+        class="cm-property">setValues</span>(<span class="cm-variable-2">updateArray</span>);
+
+    <span class="cm-keyword">return</span> <span class="cm-variable-2">updateArray</span>.<span
+        class="cm-property">length</span>;
+}
+
+<span class="cm-keyword">function</span> <span class="cm-variable">parseBody</span>(<span
+        class="cm-def">subject</span>, <span
+        class="cm-def">text</span>, <span class="cm-def">date</span>)
+{
+    <span class="cm-keyword">var</span> <span class="cm-def">displayTitle</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">sortTitle</span> = <span
+        class="cm-string">""</span>
+    <span class="cm-keyword">var</span> <span class="cm-def">displayAuthor</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">sortAuthor</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">displayChapter</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">sortChapter</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">chapterLink</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">ficLink</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">authorLink</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">totalChapterCount</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">complete</span> = <span
+        class="cm-atom">false</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">fandoms</span> = <span
+        class="cm-string">""</span>;
+    <span class="cm-keyword">var</span> <span class="cm-def">andMore</span> = <span
+        class="cm-atom">false</span>;
+
+    <span class="cm-keyword">var</span> <span class="cm-def">newChapterData</span> = <span
+        class="cm-variable-2">text</span>.<span class="cm-property">match</span>(<span class="cm-string-2">/(\S*)(.*) posted a new chapter of (.*) \([\d]* words\)/</span>);
+    <span class="cm-variable">Logger</span>.<span class="cm-property">log</span>(<span class="cm-string">"New Chapter Data: "</span> + <span
+        class="cm-variable-2">newChapterData</span>);
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">newChapterData</span> != <span
+        class="cm-atom">null</span>)
+    {
+        <span class="cm-variable-2">sortTitle</span> = <span class="cm-variable-2">newChapterData</span>[<span
+        class="cm-number">3</span>];
+        <span class="cm-variable-2">sortAuthor</span> = <span class="cm-variable-2">newChapterData</span>[<span
+        class="cm-number">1</span>];
+    }
+
+    <span class="cm-keyword">var</span> <span class="cm-def">newWork</span> = <span
+        class="cm-variable-2">text</span>.<span
+        class="cm-property">match</span>(<span class="cm-string-2">/(\S*)(.*) posted a new work/</span>);
+    <span class="cm-variable">Logger</span>.<span class="cm-property">log</span>(<span class="cm-string">"New Work Data: "</span> + <span
+        class="cm-variable-2">newWork</span>);
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">newWork</span> != <span
+        class="cm-atom">null</span>)
+    {
+        <span class="cm-keyword">var</span> <span class="cm-def">workTitle</span> = <span
+        class="cm-variable-2">text</span>.<span class="cm-property">match</span>(<span class="cm-string-2">/(.*) \([\d]* words\)/</span>);
+        <span class="cm-variable-2">sortTitle</span> = <span class="cm-variable-2">workTitle</span>[<span
+        class="cm-number">1</span>];
+        <span class="cm-variable-2">sortAuthor</span> = <span class="cm-variable-2">newWork</span>[<span
+        class="cm-number">1</span>];
+    }
+
+    <span class="cm-keyword">var</span> <span class="cm-def">linkData</span> = <span
+        class="cm-variable-2">text</span>.<span
+        class="cm-property">match</span>(<span class="cm-string-2">/(https{0,1}:\/\/archiveofourown\.org\/works\/[\d]+)(\/chapters\/[\d]+)*/</span>);
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">linkData</span> != <span
+        class="cm-atom">null</span>)
+    {
+        <span class="cm-variable-2">chapterLink</span> = <span class="cm-variable-2">linkData</span>[<span
+        class="cm-number">0</span>];
+        <span class="cm-variable-2">ficLink</span> = <span class="cm-variable-2">linkData</span>[<span
+        class="cm-number">1</span>];
+        <span class="cm-variable-2">displayTitle</span> = <span class="cm-string">'=HYPERLINK("'</span> + <span
+        class="cm-variable-2">ficLink</span> + <span class="cm-string">'","'</span> + <span
+        class="cm-variable-2">sortTitle</span> + <span class="cm-string">'")'</span>;
+    }
+
+    <span class="cm-keyword">var</span> <span class="cm-def">authorLinkData</span> = <span
+        class="cm-variable-2">text</span>.<span class="cm-property">match</span>(<span class="cm-string-2">/https{0,1}:\/\/archiveofourown\.org\/users\/.+?\/(pseuds\/[^\)]+)*/</span>);
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">authorLinkData</span> != <span
+        class="cm-atom">null</span>)
+    {
+        <span class="cm-variable-2">authorLink</span> = <span class="cm-variable-2">authorLinkData</span>[<span
+        class="cm-number">0</span>];
+    }
+
+    <span class="cm-variable-2">displayAuthor</span> =<span
+        class="cm-string">'=HYPERLINK("'</span> + <span class="cm-variable-2">authorLink</span> + <span
+        class="cm-string">'","'</span> + <span class="cm-variable-2">sortAuthor</span> + <span
+        class="cm-string">'")'</span>;
+
+    <span class="cm-keyword">var</span> <span class="cm-def">chapterCountData</span> = <span
+        class="cm-variable-2">text</span>.<span class="cm-property">match</span>(<span class="cm-string-2">/Chapters: ([\d]+)\/([\d]+|\?)/</span>);
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">chapterCountData</span> != <span
+        class="cm-atom">null</span>)
+    {
+        <span class="cm-variable-2">sortChapter</span> = <span
+        class="cm-variable-2">chapterCountData</span>[<span class="cm-number">1</span>];
+        <span class="cm-variable-2">displayChapter</span> = <span
+        class="cm-string">'=HYPERLINK("'</span> + <span
+        class="cm-variable-2">chapterLink</span> + <span class="cm-string">'","'</span> + <span
+        class="cm-variable-2">chapterCountData</span>[<span class="cm-number">1</span>] + <span
+        class="cm-string">'")'</span>;
+        <span class="cm-variable-2">totalChapterCount</span> = <span
+        class="cm-variable-2">chapterCountData</span>[<span class="cm-number">2</span>];
+        <span class="cm-variable-2">complete</span> = (<span
+        class="cm-variable-2">sortChapter</span> == <span
+        class="cm-variable-2">totalChapterCount</span>);
+    }
+
+    <span class="cm-keyword">var</span> <span class="cm-def">fandomData</span> = <span
+        class="cm-variable-2">text</span>.<span class="cm-property">match</span>(<span class="cm-string-2">/Fandom: (.*)/</span>);
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">fandomData</span> != <span
+        class="cm-atom">null</span>)
+    {
+        <span class="cm-variable-2">fandoms</span> = <span class="cm-variable-2">fandomData</span>[<span
+        class="cm-number">1</span>];
+        <span class="cm-variable-2">fandoms</span> = <span class="cm-variable-2">fandoms</span>.<span
+        class="cm-property">replace</span>(<span class="cm-string">"僕のヒーローアカデミア | Boku no Hero Academia | My Hero Academia"</span>, <span
+        class="cm-string">"My Hero Academia"</span>);
+        <span class="cm-variable-2">fandoms</span> = <span class="cm-variable-2">fandoms</span>.<span
+        class="cm-property">replace</span>(<span
+        class="cm-string">"Harry Potter - J. K. Rowling"</span>, <span
+        class="cm-string">"Harry Potter"</span>);
+        <span class="cm-variable-2">fandoms</span> = <span class="cm-variable-2">fandoms</span>.<span
+        class="cm-property">replace</span>(<span
+        class="cm-string">"Spider-Man: Into the Spider-Verse (2018)"</span>, <span
+        class="cm-string">"Into the Spider-Verse"</span>);
+    }
+
+    <span class="cm-keyword">var</span> <span class="cm-def">andMoreData</span> = <span
+        class="cm-variable-2">subject</span>.<span class="cm-property">match</span>(<span
+        class="cm-string-2">/and [\d]+ more/</span>);
+    <span class="cm-keyword">if</span>(<span class="cm-variable-2">andMoreData</span> != <span
+        class="cm-atom">null</span>)
+    {
+        <span class="cm-variable-2">andMore</span> = <span class="cm-atom">true</span>;
+    }
+
+
+    <span class="cm-keyword">return</span> [<span class="cm-variable-2">displayAuthor</span>, <span
+        class="cm-variable-2">displayTitle</span>, <span class="cm-variable-2">displayChapter</span>, <span
+        class="cm-variable-2">totalChapterCount</span>, <span class="cm-variable-2">complete</span>, <span
+        class="cm-variable-2">andMore</span>, <span class="cm-variable-2">fandoms</span>, <span
+        class="cm-variable-2">date</span>, <span class="cm-variable-2">sortAuthor</span>, <span
+        class="cm-variable-2">sortTitle</span>, <span class="cm-variable-2">sortChapter</span>];
+}
+</pre>
+    </div>
+</div>
+</body>
+</html>
