@@ -1,10 +1,15 @@
+/* Based on google app scripts css and https://github.com/maythamfahmi/codestyler/blob/master/css/CodeStyler.css */
 pre {
     background: #f4f4f4;
     border: 1px solid #ddd;
     border-left: 3px solid #f36d33;
     color: #666;
     page-break-inside: avoid;
-    font: normal normal 14px/16px "Courier New",Courier,Monospace;
+    font-weight: normal;
+    font-variant: normal;
+    font-style: normal;
+    font-size: 14px;
+    font-family: "Courier New", Courier, Monospace, monospace;
     line-height: 1.0;
     margin-bottom: 1.6em;
     max-width: 100%;
