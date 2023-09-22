@@ -4,13 +4,12 @@ function onOpen()
   ui.createMenu('Scripts')
       .addItem('Import Data', 'importData')
       .addItem('Import Lots of Data', 'startImportDataSplitComp')
-      .addItem('Copy to Public', 'copyToPublic')
       .addToUi();
 }
 
 function autoRun()
 {
-  resetProperties(true);
+  resetProperties();
   importDataSplitComp();
 }
 
@@ -46,18 +45,17 @@ function importData()
   sheet.getRange(2,1,sheet.getLastRow(),sheet.getLastColumn()).sort([9,10,11]);  
 }
 
-function resetProperties(copyWhenComplete)
+function resetProperties()
 {
   var userProperties = PropertiesService.getUserProperties();
   userProperties.setProperty('computationRunning', false);
   userProperties.setProperty('startRow', 2);
   userProperties.setProperty('startQuery', 0);
-  userProperties.setProperty('copyWhenComplete', copyWhenComplete);
 }
 
 function startImportDataSplitComp()
 {
-  resetProperties(false);
+  resetProperties();
   importDataSplitComp();
 }
 
@@ -119,27 +117,10 @@ function importDataSplitComp()
 
   Logger.log("Sorted Sheet.");
 
-  if(userProperties.getProperty('copyWhenComplete') == 'true')
-  {
-    copyToPublic();
-  }
-
-  resetProperties(false);
+  resetProperties();
 
   Logger.log("Marked Complete.");
 
-}
-
-function copyToPublic()
-{
-  var privateDoc = SpreadsheetApp.openById("ID HERE");
-  var privateSheet = privateDoc.getSheets()[0];
-  var publicDoc = SpreadsheetApp.openById("ID2 HERE");
-  var publicSheet = publicDoc.getSheets()[0];
-  publicDoc.setActiveSheet(privateSheet.copyTo(publicDoc));
-  publicDoc.deleteSheet(publicSheet);
-  publicDoc.moveActiveSheet(0);
-  publicDoc.renameActiveSheet("Data");
 }
 
 function batchProcess(startQuery, queryCount)
@@ -267,7 +248,6 @@ function parseBody(subject, text, date, messageId){
   {
     andMore = true;
   }
-                   
-  
+
   return [displayAuthor, displayTitle, displayChapter, totalChapterCount, complete, andMore, fandoms, date, sortAuthor, sortTitle, sortChapter, ficId];
 }
