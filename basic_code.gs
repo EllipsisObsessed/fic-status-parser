@@ -2,7 +2,6 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('Scripts')
       .addItem('Import Data', 'importData')
-      .addItem('Copy to Public', 'copyToPublic')
       .addToUi();
 }
 
