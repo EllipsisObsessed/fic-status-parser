@@ -30,7 +30,7 @@ function importData()
   
   do
   {
-    dataFoundLastAttempt = batchProcess(sheet, computationSheet, startQuery, perPage, startRow);
+    dataFoundLastAttempt = batchProcess(sheet, startQuery, perPage, startRow);
     startRow += dataFoundLastAttempt.length;
     startQuery += perPage;
 
