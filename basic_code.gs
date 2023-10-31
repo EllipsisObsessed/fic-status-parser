@@ -60,8 +60,12 @@ function startImportDataSplitComp()
 }
 
 //if the above version frequently times out this version is designed to split computation over multiple executions
-function importDataSplitComp()
+function importDataSplitComp(e) 
 {
+  if(e)
+  {
+    deleteTriggerById(e.triggerUid);
+  }
   var startTime = (new Date()).getTime();
 
   // get the spreadsheet
@@ -121,6 +125,15 @@ function importDataSplitComp()
 
   Logger.log("Marked Complete.");
 
+}
+
+function deleteTriggerById(id) {
+  let trigger = ScriptApp.getProjectTriggers().find(trigger => trigger.getUniqueId().toString() === id);
+    
+  if (trigger) {
+    Logger.log("Found trigger to delete");
+    ScriptApp.deleteTrigger(trigger);
+  }
 }
 
 function batchProcess(startQuery, queryCount)
